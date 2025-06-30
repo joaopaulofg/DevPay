@@ -1,15 +1,17 @@
 package com.joaopaulofg.cadastroapp.controller;
 
+import com.joaopaulofg.cadastroapp.dto.LoginRequest;
+import com.joaopaulofg.cadastroapp.dto.LoginResponse;
 import com.joaopaulofg.cadastroapp.dto.UsuarioRequest;
 import com.joaopaulofg.cadastroapp.dto.UsuarioResponse;
+import com.joaopaulofg.cadastroapp.entity.Usuario;
 import com.joaopaulofg.cadastroapp.service.UsuarioService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -26,6 +28,23 @@ public class UsuarioController {
         } else {
             return new ResponseEntity<>(newUser,  HttpStatus.CREATED);
         }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        String token = usuarioService.login(loginRequest.telefone(), loginRequest.senha());
+        return new ResponseEntity<>(new LoginResponse(token), HttpStatus.OK);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Usuario> me(@AuthenticationPrincipal UserDetails userDetails) {
+        var user = (Usuario) userDetails;
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/teste")
+    public ResponseEntity<String> me() {
+        return ResponseEntity.ok("Teste");
     }
 
 }
